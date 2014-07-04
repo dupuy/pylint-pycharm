@@ -62,9 +62,14 @@ def get_root_path(module_name):
 def pop_arg_from_list(args, name):
     new_args = []
     result = None
+    i = 0
     for arg in args:
+        i += 1
         if arg.startswith(name):
-            result = arg.split("=")[1]
+            try:
+                result = arg.split("=")[1]
+            except IndexError:
+                result = args[i]
         else:
             new_args.append(arg)
     return result
