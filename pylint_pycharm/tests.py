@@ -33,7 +33,7 @@ class AcceptanceTest(TestCase):
         result = pros.stdout.read()
         self.assertEqual(result, expected_result)
 
-        
+
 class MainTest(TestCase):
     """
     tests for convert.convert function
@@ -42,7 +42,8 @@ class MainTest(TestCase):
         """
         successful scenario
         """
-        import convertor, StringIO
+        import convertor
+        import StringIO
         io = StringIO.StringIO()
         args = ["convertor.py", "sample.py", "--reports=n",  "--output-format=parseable"]
         expected_result = "%s/sample.py:6:0: [C] More than one statement on a single line\n" % PROJECT_FOLDER
@@ -51,7 +52,8 @@ class MainTest(TestCase):
         self.assertEqual(expected_result, result)
 
     def test_error(self):
-        import convertor, StringIO
+        import convertorx
+        import StringIO
         help_text = "This is help test"
         convertor.HELP_TEXT = help_text
         original_parse_module_name = convertor.parse_module_name
@@ -63,12 +65,10 @@ class MainTest(TestCase):
         expected_result = "Error: exception\n"+help_text
         self.assertEqual(expected_result, result)
 
-
     @staticmethod
     def parse_module_name_mock(_):
         from convertor import PylintPycharmException
         raise PylintPycharmException("exception")
-
 
 
 class ParseModuleNameTests(TestCase):
@@ -112,6 +112,7 @@ class ParseModuleNameTests(TestCase):
         except self.PylintPycharmException:
             pass
 
+
 class ParsePylintArgsTests(TestCase):
     """
     test of convert.parse_pylint_args function
@@ -119,7 +120,7 @@ class ParsePylintArgsTests(TestCase):
     def setUp(self):
         import convertor
         self.parse_pylint_args = convertor.parse_pylint_args
-        
+
     def test_success(self):
         """
         success scenario
@@ -135,6 +136,7 @@ class ParsePylintArgsTests(TestCase):
         args = ["program_name", "--virtualenv=path_to_virtualenv", "module_name1", "--param2=test2"]
         result = self.parse_pylint_args(args)
         self.assertEquals(result, ["--param2=test2"])
+
 
 class FormatCommandForProcessTest(TestCase):
     """
@@ -160,6 +162,7 @@ class FormatCommandForProcessTest(TestCase):
         expected = ". virtual_path/bin/activate && pylint module_name arg1 arg2"
         self.assertEqual(result, expected)
 
+
 class ParseOutputTest(TestCase):
     """
     tests for convert.parse_output function
@@ -170,10 +173,11 @@ class ParseOutputTest(TestCase):
         """
         import convertor
         root_path = "root_path"
-        txt="filename:7: descr1\nsummary"
-        expected_result="root_path/filename:7:0: descr1\nsummary"
+        txt = "filename:7: descr1\nsummary"
+        expected_result = "root_path/filename:7:0: descr1\nsummary"
         result = convertor.parse_output(root_path, txt)
         self.assertEqual(result, expected_result)
+
 
 class GetRootPathTest(TestCase):
     """

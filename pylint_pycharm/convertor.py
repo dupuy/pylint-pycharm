@@ -3,7 +3,8 @@
 """
 Main module of pylint-pycharm project
 """
-import sys, os
+import sys
+import os
 import subprocess
 import re
 
@@ -15,21 +16,22 @@ HELP_TEXT = "Please read README file for more information"
 
 EXCEPTION_MESSAGE_TEMPLATE = "Error: %(error_message)s\n%(help_text)s"
 
+
 def convert(args, out_stream):
     """
     Enter point to the program
     """
     try:
-        #find module or package name for code checking
+        # find module or package name for code checking
         module_name = parse_module_name(args)
 
-        #find directory full path where module or package is
+        # find directory full path where module or package is
         root_path = os.path.abspath(os.path.dirname(module_name))
 
         virtualenv_path = pop_arg_from_list(args, "--virtualenv")
         msg_template = pop_arg_from_list(args, "--msg-template")
 
-        #remove non-pylint parameters
+        # remove non-pylint parameters
         pylint_args = parse_pylint_args(args)
 
         # add --output-format (or --msg-template) argument
@@ -39,25 +41,25 @@ def convert(args, out_stream):
         else:
             add_arg_to_list(pylint_args, "--output-format", "parseable")
 
-
-
-        #format command to run in subprocess
+        # format command to run in subprocess
         command = format_command_for_process(module_name, pylint_args, virtualenv_path)
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         pylint_output = process.stdout.read()
 
-        #parse result
+        # parse result
         output_text = parse_output(root_path, pylint_output)
         out_stream.write(output_text)
     except PylintPycharmException as ex:
         out_stream.write(EXCEPTION_MESSAGE_TEMPLATE %
-                     {"error_message": ex.message, "help_text": HELP_TEXT})
+                         {"error_message": ex.message, "help_text": HELP_TEXT})
+
 
 def get_root_path(module_name):
     if os.path.isfile(module_name):
         return os.path.abspath(os.path.dirname(module_name))
     else:
         return os.path.abspath(module_name)
+
 
 def pop_arg_from_list(args, name):
     new_args = []
@@ -74,6 +76,7 @@ def pop_arg_from_list(args, name):
             new_args.append(arg)
     return result
 
+
 def add_arg_to_list(args, name, value):
     idx = -1
     param = '%s="%s"' % (name, value.replace('"', '\\"'))
@@ -85,6 +88,7 @@ def add_arg_to_list(args, name, value):
     else:
         args.append(param)
 
+
 def parse_module_name(args):
     """
     Search and return module or package name from list of arguments
@@ -92,9 +96,10 @@ def parse_module_name(args):
     module_names = [arg for arg in args[1:] if not arg.startswith("--")]
     if not module_names:
         raise PylintPycharmException("Can not find module or package name for analyse")
-    if len(module_names)>1:
+    if len(module_names) > 1:
         raise PylintPycharmException("More than one module or package name")
     return module_names[0]
+
 
 def parse_pylint_args(args):
     """
@@ -102,6 +107,7 @@ def parse_pylint_args(args):
     """
     return ['"' + arg.replace('"', '\\"') + '"' for arg in args
             if (arg.startswith("--") and (not arg.startswith("--virtualenv")))]
+
 
 def format_command_for_process(module_name, pylint_args, virtualenv_path=None):
     """
