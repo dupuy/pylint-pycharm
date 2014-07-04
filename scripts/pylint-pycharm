@@ -5,4 +5,3 @@ from pylint_pycharm import convertor
 
 if __name__ == "__main__":
     convertor.convert(sys.argv, sys.stdout)
-  
