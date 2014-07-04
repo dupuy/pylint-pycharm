@@ -7,8 +7,8 @@ import sys, os
 import subprocess
 import re
 
-MESSAGE_PATTERN = r"^(?P<filename>[^:]*):(?P<line_number>\d+): (?P<description>.*)"
-PYCHARM_MESSAGE_FORMAT = "%(full_path)s:%(line_number)s:0: %(description)s"
+MESSAGE_PATTERN = r"^(?P<filename>[^:]*):(?P<line_number>\d+)(:(?P<column>\d+))?: (?P<description>.*)"
+PYCHARM_MESSAGE_FORMAT = "%(full_path)s:%(line_number)s:%(column)s: %(description)s"
 
 HELP_TEXT = "Please read README file for more information"
 # HELP_TEXT = open(os.path.join("..", "README")).read()
@@ -27,12 +27,17 @@ def convert(args, out_stream):
         root_path = os.path.abspath(os.path.dirname(module_name))
 
         virtualenv_path = pop_arg_from_list(args, "--virtualenv")
+        msg_template = pop_arg_from_list(args, "--msg-template")
 
         #remove non-pylint parameters
         pylint_args = parse_pylint_args(args)
 
-        # add --output-format argument
-        add_arg_to_list(pylint_args, "--output-format", "parseable")
+        # add --output-format (or --msg-template) argument
+        if msg_template is not None:
+            add_arg_to_list(pylint_args, "--msg-template",
+                            "{path}:{line}:{column}: [{msg_id}({symbol}), {obj}] {msg}")
+        else:
+            add_arg_to_list(pylint_args, "--output-format", "parseable")
 
 
 
@@ -66,7 +71,7 @@ def pop_arg_from_list(args, name):
 
 def add_arg_to_list(args, name, value):
     idx = -1
-    param = "%s=%s" % (name, value)
+    param = '%s="%s"' % (name, value.replace('"', '\\"'))
     for i, arg in enumerate(args):
         if arg.startswith(name):
             idx = i
@@ -90,7 +95,7 @@ def parse_pylint_args(args):
     """
     remove arguments accepted by this utility and leave only arguments accepted by pylint
     """
-    return [arg for arg in args
+    return ['"' + arg.replace('"', '\\"') + '"' for arg in args
             if (arg.startswith("--") and (not arg.startswith("--virtualenv")))]
 
 def format_command_for_process(module_name, pylint_args, virtualenv_path=None):
@@ -115,7 +120,9 @@ def parse_output(root_path, txt):
         ms = re.match(MESSAGE_PATTERN, line)
         if ms:
             full_path = os.path.join(root_path, ms.group(1))
-            data = {"full_path": full_path, "line_number": ms.group("line_number"),
+            data = {"full_path": full_path,
+                    "line_number": ms.group("line_number"),
+                    "column": ms.group("column") or '0',
                     "description": ms.group("description")}
             result.append(PYCHARM_MESSAGE_FORMAT % data)
         else:

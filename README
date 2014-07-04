@@ -9,14 +9,24 @@ sample.py:6: [C] More than one statement on a single line
 pylint_pychar format:
 /home/vadim/Projects/pylint-pycharm/sample.py:6:0: [C] More than one statement on a single line
 
+Pylint format (with new --msg-template option including columns and ids)
+sample.py:6:6: [C0321(multiple-statements), ] More than one statement on a single line
+
+pylint_pychar format:
+/home/vadim/Projects/pylint-pycharm/sample.py:6:6: [C0321(multiple-statements), ] More than one statement on a single line
+
 Parameters:
 
-    pylint_pycharm accepets all paramters accepted by pylint. (type pylint --help to see full list)
+    pylint_pycharm accepts all paramters accepted by pylint.
+    (type pylint --help to see full list)
 
-    --virtualenv=path/to/virtualenv/  - path to virtual environment directory.
+    --virtualenv=/path/to/virtualenv/  - path to virtual environment directory.
 
 Note:
-parameter '--output-format=parseable' is added automatically by pylint_pychar
+parameter '--output-format=parseable' is added automatically by pylint_pycharm
+unless a new-style (pylint 1.0+) '--msg-template=' argument is passed,
+then '--msg-template={path}:{line}:{column}: [{msg_id}({symbol}), {obj}] {msg}'
+is added automatically instead.
 
 Example:
     python pylint_pycharm.py sample.py
