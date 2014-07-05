@@ -42,17 +42,17 @@ class MainTest(TestCase):
         """
         successful scenario
         """
-        import convertor
+        import pylint_pycharm.convertor as convertor
         import StringIO
         io = StringIO.StringIO()
-        args = ["convertor.py", "sample.py", "--reports=n",  "--output-format=parseable"]
+        args = ["convertor.py", "sample.py", "--reports=n", "--output-format=parseable"]
         expected_result = "%s/sample.py:6:0: [C] More than one statement on a single line\n" % PROJECT_FOLDER
         convertor.convert(args, io)
         result = io.getvalue()
         self.assertEqual(expected_result, result)
 
     def test_error(self):
-        import convertorx
+        import pylint_pycharm.convertor as convertor
         import StringIO
         help_text = "This is help test"
         convertor.HELP_TEXT = help_text
@@ -67,7 +67,7 @@ class MainTest(TestCase):
 
     @staticmethod
     def parse_module_name_mock(_):
-        from convertor import PylintPycharmException
+        from pylint_pycharm.convertor import PylintPycharmException
         raise PylintPycharmException("exception")
 
 
@@ -77,7 +77,7 @@ class ParseModuleNameTests(TestCase):
     """
 
     def setUp(self):
-        import convertor
+        import pylint_pycharm.convertor as convertor
         self.parse_module_name = convertor.parse_module_name
         self.PylintPycharmException = convertor.PylintPycharmException
 
@@ -118,7 +118,7 @@ class ParsePylintArgsTests(TestCase):
     test of convert.parse_pylint_args function
     """
     def setUp(self):
-        import convertor
+        import pylint_pycharm.convertor as convertor
         self.parse_pylint_args = convertor.parse_pylint_args
 
     def test_success(self):
@@ -144,7 +144,7 @@ class FormatCommandForProcessTest(TestCase):
     """
 
     def setUp(self):
-        import convertor
+        import pylint_pycharm.convertor as convertor
         self.format_command_for_process = convertor.format_command_for_process
 
     def test_success(self):
@@ -171,7 +171,7 @@ class ParseOutputTest(TestCase):
         """
         Success scenario
         """
-        import convertor
+        import pylint_pycharm.convertor as convertor
         root_path = "root_path"
         txt = "filename:7: descr1\nsummary"
         expected_result = "root_path/filename:7:0: descr1\nsummary"
@@ -185,13 +185,13 @@ class GetRootPathTest(TestCase):
     """
 
     def test_path_is_file(self):
-        from convertor import get_root_path
+        from pylint_pycharm.convertor import get_root_path
         folder = get_root_path("sample.py")
         expected = PROJECT_FOLDER
         self.assertEqual(expected, folder)
 
     def test_path_is_directory(self):
-        from convertor import get_root_path
+        from pylint_pycharm.convertor import get_root_path
         folder = get_root_path("sample_package")
         expected = "%s/sample_package" % PROJECT_FOLDER
         self.assertEqual(expected, folder)
