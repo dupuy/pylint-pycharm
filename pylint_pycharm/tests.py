@@ -6,7 +6,10 @@ import unittest
 import subprocess
 import os
 
-PROJECT_FOLDER = os.path.abspath(os.path.dirname(__file__))
+ROOT_FOLDER = os.path.abspath(os.path.dirname(__file__))
+PROJECT_FOLDER = os.path.dirname(__file__)
+if PROJECT_FOLDER:
+    PROJECT_FOLDER = PROJECT_FOLDER + '/'
 
 
 class AcceptanceTest(TestCase):
@@ -17,21 +20,21 @@ class AcceptanceTest(TestCase):
         """
         successful scenario
         """
-        command = "python convertor.py sample.py --reports=n"
-        expected_result = "%s/sample.py:6:0: [C] More than one statement on a single line\n" % PROJECT_FOLDER
+        command = "python %sconvertor.py %ssample.py --reports=n" % (PROJECT_FOLDER, PROJECT_FOLDER)
+        expected_result = "%ssample.py:6:[06]: \\[[^]]*\\] More than one statement on a single line\n" % PROJECT_FOLDER
         pros = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         result = pros.stdout.read()
-        self.assertEqual(result, expected_result)
+        self.assertRegexpMatches(result, expected_result)
 
     def test_folder_success(self):
         """
         successful scenario
         """
-        command = "python convertor.py sample_package --reports=n"
-        expected_result = "%s/sample_package/sample_module.py:6:0: [C] More than one statement on a single line\n" % PROJECT_FOLDER
+        command = "python %sconvertor.py %ssample_package --rcfile=/dev/null --reports=n" % (PROJECT_FOLDER, PROJECT_FOLDER)
+        expected_result = "%ssample_package/sample_module.py:6:[06]: \\[[^]]*\\] More than one statement on a single line\n" % PROJECT_FOLDER
         pros = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         result = pros.stdout.read()
-        self.assertEqual(result, expected_result)
+        self.assertRegexpMatches(result, expected_result)
 
 
 class MainTest(TestCase):
@@ -45,11 +48,12 @@ class MainTest(TestCase):
         import pylint_pycharm.convertor as convertor
         import StringIO
         io = StringIO.StringIO()
-        args = ["convertor.py", "sample.py", "--reports=n", "--output-format=parseable"]
-        expected_result = "%s/sample.py:6:0: [C] More than one statement on a single line\n" % PROJECT_FOLDER
+        sample = "%ssample.py" % PROJECT_FOLDER
+        args = ["convertor.py", sample, "--reports=n", "--output-format=parseable"]
+        expected_result = "%ssample.py:6:[06]: \\[[^]]*\\] More than one statement on a single line\n" % PROJECT_FOLDER
         convertor.convert(args, io)
         result = io.getvalue()
-        self.assertEqual(expected_result, result)
+        self.assertRegexpMatches(result, expected_result)
 
     def test_error(self):
         import pylint_pycharm.convertor as convertor
@@ -127,15 +131,15 @@ class ParsePylintArgsTests(TestCase):
         """
         args = ["program_name", "--param1=test", "module_name1", "--param2=test2"]
         result = self.parse_pylint_args(args)
-        self.assertEquals(result, ["--param1=test", "--param2=test2"])
+        self.assertEquals(result, ['"--param1=test"', '"--param2=test2"'])
 
-    def test_success_with_virutalenv(self):
+    def test_success_with_virtualenv(self):
         """
         virtualenv should be excluded from list of arguments passed to pylint
         """
         args = ["program_name", "--virtualenv=path_to_virtualenv", "module_name1", "--param2=test2"]
         result = self.parse_pylint_args(args)
-        self.assertEquals(result, ["--param2=test2"])
+        self.assertEquals(result, ['"--param2=test2"'])
 
 
 class FormatCommandForProcessTest(TestCase):
@@ -186,16 +190,18 @@ class GetRootPathTest(TestCase):
 
     def test_path_is_file(self):
         from pylint_pycharm.convertor import get_root_path
-        folder = get_root_path("sample.py")
-        expected = PROJECT_FOLDER
+        folder = get_root_path("%ssample.py" % PROJECT_FOLDER)
+        expected = ROOT_FOLDER
         self.assertEqual(expected, folder)
 
     def test_path_is_directory(self):
         from pylint_pycharm.convertor import get_root_path
-        folder = get_root_path("sample_package")
-        expected = "%s/sample_package" % PROJECT_FOLDER
+        folder = get_root_path("%ssample_package" % PROJECT_FOLDER)
+        expected = "%s/sample_package" % ROOT_FOLDER
         self.assertEqual(expected, folder)
 
 
 if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, os.path.dirname(ROOT_FOLDER))
     unittest.main()
