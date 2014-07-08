@@ -7,13 +7,13 @@ Pylint format (with --output-format=parseable)
 sample.py:6: [C] More than one statement on a single line
 
 pylint_pychar format:
-/home/vadim/Projects/pylint-pycharm/sample.py:6:0: [C] More than one statement on a single line
+/home/vadim/Projects/pylint-pycharm/pylint_pycharm/sample.py:6:0: [C] More than one statement on a single line
 
 Pylint format (with new --msg-template option including columns and ids)
 sample.py:6:6: [C0321(multiple-statements), ] More than one statement on a single line
 
 pylint_pychar format:
-/home/vadim/Projects/pylint-pycharm/sample.py:6:6: [C0321(multiple-statements), ] More than one statement on a single line
+/home/vadim/Projects/pylint-pycharm/pylint_pycharm/sample.py:6:6: [C0321(multiple-statements), ] More than one statement on a single line
 
 Parameters:
 

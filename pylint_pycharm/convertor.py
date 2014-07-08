@@ -26,7 +26,9 @@ def convert(args, out_stream):
         module_name = parse_module_name(args)
 
         # find directory full path where module or package is
-        root_path = os.path.abspath(os.path.dirname(module_name))
+        # if current directory is a parent, pylint prints relative paths,
+        # otherwise it prints absolute paths (and root_path has no effect)
+        root_path = os.path.realpath(os.path.abspath("."))
 
         virtualenv_path = pop_arg_from_list(args, "--virtualenv")
         msg_template = pop_arg_from_list(args, "--msg-template")
@@ -52,13 +54,6 @@ def convert(args, out_stream):
     except PylintPycharmException as ex:
         out_stream.write(EXCEPTION_MESSAGE_TEMPLATE %
                          {"error_message": ex.message, "help_text": HELP_TEXT})
-
-
-def get_root_path(module_name):
-    if os.path.isfile(module_name):
-        return os.path.abspath(os.path.dirname(module_name))
-    else:
-        return os.path.abspath(module_name)
 
 
 def pop_arg_from_list(args, name):
