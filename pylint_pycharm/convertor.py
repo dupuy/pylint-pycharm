@@ -19,11 +19,26 @@ EXCEPTION_MESSAGE_TEMPLATE = "Error: %(error_message)s\n%(help_text)s"
 
 def convert(args, out_stream):
     """
-    Enter point to the program
+    Entry point to the program
     """
+    initfile = None
     try:
         # find module or package name for code checking
         module_name = parse_module_name(args)
+
+        # Python 2.x and 3.[012] require __init__.py in a package directory;
+        # create an empty (temporary) one if none exists
+        version = sys.version_info[0:2]
+        if version[0] < 3 or (version[0] == 3 and version[1] < 3):
+            module_path = module_name.replace('.', os.path.sep)
+            initfile = os.path.join(module_path, '__init__.py')
+            if os.path.isdir(module_path) and not os.path.isfile(initfile):
+                try:
+                    open(initfile, 'a').close()
+                except IOError:
+                    initfile = None
+            else:
+                initfile = None
 
         # find directory full path where module or package is
         # if current directory is a parent, pylint prints relative paths,
@@ -54,6 +69,12 @@ def convert(args, out_stream):
     except PylintPycharmException as ex:
         out_stream.write(EXCEPTION_MESSAGE_TEMPLATE %
                          {"error_message": ex.message, "help_text": HELP_TEXT})
+    finally:
+        try:
+            if initfile is not None and os.path.getsize(initfile) == 0:
+                os.unlink(initfile)
+        except OSError:
+            pass                      # don't care if already unlinked
 
 
 def pop_arg_from_list(args, name):

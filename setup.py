@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = "pylint_pycharm",
     packages = ["pylint_pycharm"],
-    version = "1.0.0",
+    version = "1.0.1",
     description = "Pylint to Pycharm message converter",
     author = "Wadim Ovcharenko",
     author_email = "wadim@veles-soft.com",
